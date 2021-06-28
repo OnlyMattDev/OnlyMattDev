@@ -9,35 +9,8 @@ def sidebar args
 
 end
 
-#ignore this, they are lines i was going to try and build a grid, but not going to right now.
-def grids args
-  #vert
-  args.outputs.solids << [400,50,400,5]
-  args.outputs.solids << [400,100,400,5]
-  args.outputs.solids << [400,150,400,5]
-  args.outputs.solids << [400,200,400,5]
-  args.outputs.solids << [400,250,400,5]
-  args.outputs.solids << [400,300,400,5]
-  args.outputs.solids << [400,350,400,5]
-  args.outputs.solids << [400,400,400,5]
-  args.outputs.solids << [400,450,400,5]
-  args.outputs.solids << [400,500,400,5]
-  args.outputs.solids << [400,550,400,5]
-  args.outputs.solids << [400,600,400,5]
-  args.outputs.solids << [400,650,400,5]
-  args.outputs.solids << [400,700,400,5]
-  #hor
-  args.outputs.solids << [450,0,5,720]
-  args.outputs.solids << [500,0,5,720]
-  args.outputs.solids << [550,0,5,720]
-  args.outputs.solids << [600,0,5,720]
-  args.outputs.solids << [650,0,5,720]
-  args.outputs.solids << [700,0,5,720]
-  args.outputs.solids << [750,0,5,720]
-end
-
 def points args
-  @score = 0
+  @score ||= 0
 
   if @apple.inside_rect? @snake
     @score += 10
