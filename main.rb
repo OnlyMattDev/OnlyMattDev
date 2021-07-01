@@ -12,16 +12,18 @@ end
 def points args
   @score ||= 0
 
-  if @apple.inside_rect? @snake
+  if @apple.inside_rect? @snakeboxhead or args.inputs.keyboard.key_down.space
     @score += 10
     args.state.ax += rand(500)
     args.state.ay += rand(600)
+    
    end
 
 end
 
 def label args
-  
+  args.outputs.labels << [250,500,args.state.snake_sec,255,255,255]
+  args.outputs.labels << [250,550,args.state.snakehead,255,255,255]
   args.outputs.labels << [250,700,"Score:",255,255,255]
   args.outputs.labels << [315,700,@score,255,255,255]
   if args.state.start == 0
@@ -53,57 +55,87 @@ def apple args
 end
 
 def snake args
+  args.state.snake_sec ||=0
+  args.state.ssx ||= 50 
+  args.state.ssy ||= 50     
+  args.state.x ||= 450
   args.state.start ||= 0
-  speed   = 1
+  speed   = 2
 
-  if args.inputs.keyboard.key_down.enter
+  #start game
+    if args.inputs.keyboard.key_down.enter
     args.state.dx = speed
     args.state.dy = 0
     args.state.start = 1
   end
-  args.state.x ||= 450  
- 
-    @snake = [args.state.x,
-             args.state.y,
-             args.state.ssx,
-             args.state.ssy,
-             1,
-             255,
-             1
-    ]
-                 
+
+  @snakeboxhead = [
+    args.state.x-11,
+    args.state.y-11,
+    args.state.ssx+22,
+    args.state.ssy+22,
+    1,
+    255,
+    1,
+    0
+  ]
+    
     if args.state.start == 1
-      args.outputs.solids << @snake
+      args.outputs.solids << [
+        args.state.x, 
+        args.state.y, 
+        args.state.ssx,
+        args.state.ssy,
+        10,
+        200,
+        10]
+        scale = 20
+        args.outputs.solids << (args.state.snake_sec.map do |snake_sec|
+          {
+            x: args.state.x[0] * scale % 1280, y: args.state.y[1] * scale % 720, w: scale, h: scale
+          }
+        end)
+
+      args.outputs.borders << @snakeboxhead
     end
-    
-    #snake size
-      args.state.ssx = 50 
-      args.state.ssy = 50 
-    
-    #Snake Move
+
       args.state.x += args.state.dx
       args.state.y += args.state.dy
+
     #right
-      if args.inputs.keyboard.key_down.right & args.state.dx == 0 
+      if args.state.move_right && args.state.dx == 0 
         args.state.dx = speed
         args.state.dy = 0
+        args.state.a = 0
+        args.state.dir = 1
+        args.state.snakehead = "right"
       end
     #up
-      if args.inputs.keyboard.key_down.up & args.state.dy == 0 
+      if args.state.move_up && args.state.dy == 0 
         args.state.dx = 0
         args.state.dy = speed
+        args.state.a = 90
+        args.state.dir = 2
+        args.state.snakehead = "up"
       end
     #left
-      if args.inputs.keyboard.key_down.left & args.state.dx == 0 
+      if args.state.move_left && args.state.dx == 0
         args.state.dx = -speed
         args.state.dy = 0
+        args.state.a = 180
+        args.state.dir = 3
+        args.state.snakehead = "left"
       end
     #down
-      if args.inputs.keyboard.key_down.down & args.state.dy == 0 
+      if args.state.move_down && args.state.dy == 0 
         args.state.dx = 0
         args.state.dy = -speed
-      end
+        args.state.a = -90
+        args.state.dir = 4
+        args.state.snakehead = "down"
 
+      end
+      
     #screen wrap  
       if args.state.x >= 801 
         args.state.x = 351
@@ -119,7 +151,20 @@ def snake args
       end
 end
 
+def controls args
+
+      #Snake Move
+    
+    #Key Press direction
+    args.state.move_right   = args.inputs.keyboard.key_down.right || args.inputs.keyboard.key_down.d
+    args.state.move_left    = args.inputs.keyboard.key_down.left  || args.inputs.keyboard.key_down.a
+    args.state.move_up      = args.inputs.keyboard.key_down.up    || args.inputs.keyboard.key_down.w
+    args.state.move_down    = args.inputs.keyboard.key_down.down  || args.inputs.keyboard.key_down.s
+
+end
+
 def tick args
+  controls args
   background args
   points args
   label args 
