@@ -10,10 +10,10 @@ def sidebar args
 end
 
 def points args
-  @score ||= 0
+  args.state.score ||= 0
 
-  if @apple.inside_rect? @snakeboxhead
-    @score += 10
+  if @apple.inside_rect? @snakebox
+    args.state.score += 10
     args.state.ax += rand(500)
     args.state.ay += rand(600)
     args.state.snake_size += 10  
@@ -26,8 +26,9 @@ def label args
   args.outputs.labels << [250,500,args.state.snake_sec,255,255,255]
   args.outputs.labels << [250,550,args.state.snakehead,255,255,255]
   args.outputs.labels << [250,700,"Score:",255,255,255]
-  args.outputs.labels << [315,700,@score,255,255,255]
+  args.outputs.labels << [315,700,args.state.score,255,255,255]
   if args.state.start == 0
+    args.state.score =0
     args.outputs.labels << [475,700,"Press Enter to Start",255,55,255,]
   end
 end
@@ -57,7 +58,7 @@ end
 
 def snake args
   #the array
-  args.state.snake_seg ||= [[args.state.x,args.state.y]]
+  args.state.snake_seg ||= [[args.state.x,args.state.y],[args.state.x+25,args.state.y+25]]
   args.state.snake_size ||= 25      
   args.state.start ||= 0
   args.state.speed   = 2
@@ -71,37 +72,56 @@ def snake args
     args.state.start = 1
     args.state.x ||= 450
   end
-  #hitbox
   @snakeboxhead = [
-    args.state.x-11,
-    args.state.y-11,
-    47,
-    47,
+    args.state.x,
+    args.state.y,
+    15,
+    15,
     1,
-    255,
     1,
-    0
+    1,
+  ]
+  #hitbox
+  @snakebox = [
+    args.state.x-15,
+    args.state.y-15,
+    55,
+    55,
+    1,
+    1,
+    1,
+    255
   ]
 
   args.state.snake_seg << @snakeboxhead
     #length of array                    its own varabile
   if args.state.snake_seg.size > args.state.snake_size
     args.state.snake_seg.shift
-end
+  end
 
   if args.state.start == 1
       
-      args.outputs.solids << (args.state.snake_seg.map do |snake|
+      args.outputs.solids<< (args.state.snake_seg.map do |snake|
         {
           x:snake[0], y:snake[1], w:25, h:25, r:10, g:255, b:10
         }
       
       end)
   
-      args.outputs.borders << @snakeboxhead
-  end
+    snake_rects = args.state.snake_seg.map do |snake|
+      {
+       x:snake[0],y:snake[1],w:25,h:25,r:10,g:255,b:10
+      }
+    end
+
+      args.outputs.borders << @snakebox
+      
+
+      
 
   end
+
+end
 
 def wrap args
    #screen wrap  
