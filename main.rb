@@ -12,7 +12,7 @@ end
 def points args
   @score ||= 0
 
-  if @apple.inside_rect? @snakeboxhead or args.inputs.keyboard.key_down.space
+  if @apple.inside_rect? @snakeboxhead
     @score += 10
     args.state.ax += rand(500)
     args.state.ay += rand(600)
@@ -55,103 +55,104 @@ def apple args
 end
 
 def snake args
-  args.state.snake_sec ||=0
-  args.state.ssx ||= 50 
-  args.state.ssy ||= 50     
-  args.state.x ||= 450
+  args.state.snake_seg ||= [[args.state.x,args.state.y]]
+  args.state.size ||= 1      
   args.state.start ||= 0
-  speed   = 2
+  args.state.speed   = 2
+
+  args.state.snake_size += 1 if args.inputs.keyboard.key_down.space
 
   #start game
     if args.inputs.keyboard.key_down.enter
-    args.state.dx = speed
+    args.state.dx = args.state.speed
     args.state.dy = 0
     args.state.start = 1
+    args.state.x ||= 450
   end
-
+  #hitbox
   @snakeboxhead = [
     args.state.x-11,
     args.state.y-11,
-    args.state.ssx+22,
-    args.state.ssy+22,
+    72,
+    72,
     1,
     255,
     1,
     0
   ]
     
-    if args.state.start == 1
-      args.outputs.solids << [
-        args.state.x, 
-        args.state.y, 
-        args.state.ssx,
-        args.state.ssy,
-        10,
-        200,
-        10]
-        scale = 20
-        args.outputs.solids << (args.state.snake_sec.map do |snake_sec|
-          {
-            x: args.state.x[0] * scale % 1280, y: args.state.y[1] * scale % 720, w: scale, h: scale
-          }
-        end)
+  if args.state.s.size > args.state.s_size
+    args.state.s.shift
+  end
 
-      args.outputs.borders << @snakeboxhead
-    end
-
-      args.state.x += args.state.dx
-      args.state.y += args.state.dy
-
-    #right
-      if args.state.move_right && args.state.dx == 0 
-        args.state.dx = speed
-        args.state.dy = 0
-        args.state.a = 0
-        args.state.dir = 1
-        args.state.snakehead = "right"
-      end
-    #up
-      if args.state.move_up && args.state.dy == 0 
-        args.state.dx = 0
-        args.state.dy = speed
-        args.state.a = 90
-        args.state.dir = 2
-        args.state.snakehead = "up"
-      end
-    #left
-      if args.state.move_left && args.state.dx == 0
-        args.state.dx = -speed
-        args.state.dy = 0
-        args.state.a = 180
-        args.state.dir = 3
-        args.state.snakehead = "left"
-      end
-    #down
-      if args.state.move_down && args.state.dy == 0 
-        args.state.dx = 0
-        args.state.dy = -speed
-        args.state.a = -90
-        args.state.dir = 4
-        args.state.snakehead = "down"
-
-      end
+  if args.state.start == 1
       
-    #screen wrap  
-      if args.state.x >= 801 
-        args.state.x = 351
-      end
-      if args.state.y >= 720 
-        args.state.y = -50
-      end
-      if args.state.x <= 350
-        args.state.x = 800
-      end
-      if args.state.y <= -51 
-        args.state.y = 720
-      end
+      args.outputs.solids << (args.state.snake_seg.map do |snake|
+        {
+          x:snake[0], y:snake[1], w:50, h:50, r:10, g:255, b:10
+        }
+      
+      end)
+  
+      args.outputs.borders << @snakeboxhead
+  end
+
+  end
+
+def wrap args
+   #screen wrap  
+   if args.state.x >= 801 
+    args.state.x = 351
+  end
+  if args.state.y >= 720 
+    args.state.y = -50
+  end
+  if args.state.x <= 350
+    args.state.x = 800
+  end
+  if args.state.y <= -51 
+    args.state.y = 720
+  end
+  
 end
 
 def controls args
+
+  args.state.x += args.state.dx
+  args.state.y += args.state.dy
+
+  #right
+  if args.state.move_right && args.state.dx == 0 
+    args.state.dx = args.state.speed
+    args.state.dy = 0
+    args.state.a = 0
+    args.state.dir = 1
+    args.state.snakehead = "right"
+  end
+  #up
+  if args.state.move_up && args.state.dy == 0 
+    args.state.dx = 0
+    args.state.dy = args.state.speed
+    args.state.a = 90
+    args.state.dir = 2
+    args.state.snakehead = "up"
+  end
+  #left
+  if args.state.move_left && args.state.dx == 0
+    args.state.dx = -args.state.speed
+    args.state.dy = 0
+    args.state.a = 180
+    args.state.dir = 3
+    args.state.snakehead = "left"
+  end
+  #down
+  if args.state.move_down && args.state.dy == 0 
+    args.state.dx = 0
+    args.state.dy = -args.state.speed
+    args.state.a = -90
+    args.state.dir = 4
+    args.state.snakehead = "down"
+  end
 
       #Snake Move
     
@@ -165,6 +166,7 @@ end
 
 def tick args
   controls args
+  wrap args
   background args
   points args
   label args 
