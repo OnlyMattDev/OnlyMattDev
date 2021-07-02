@@ -16,6 +16,7 @@ def points args
     @score += 10
     args.state.ax += rand(500)
     args.state.ay += rand(600)
+    args.state.snake_size += 10  
     
    end
 
@@ -55,8 +56,9 @@ def apple args
 end
 
 def snake args
+  #the array
   args.state.snake_seg ||= [[args.state.x,args.state.y]]
-  args.state.size ||= 1      
+  args.state.snake_size ||= 25      
   args.state.start ||= 0
   args.state.speed   = 2
 
@@ -73,23 +75,25 @@ def snake args
   @snakeboxhead = [
     args.state.x-11,
     args.state.y-11,
-    72,
-    72,
+    47,
+    47,
     1,
     255,
     1,
     0
   ]
-    
-  if args.state.s.size > args.state.s_size
-    args.state.s.shift
-  end
+
+  args.state.snake_seg << @snakeboxhead
+    #length of array                    its own varabile
+  if args.state.snake_seg.size > args.state.snake_size
+    args.state.snake_seg.shift
+end
 
   if args.state.start == 1
       
       args.outputs.solids << (args.state.snake_seg.map do |snake|
         {
-          x:snake[0], y:snake[1], w:50, h:50, r:10, g:255, b:10
+          x:snake[0], y:snake[1], w:25, h:25, r:10, g:255, b:10
         }
       
       end)
